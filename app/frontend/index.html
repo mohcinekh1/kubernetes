@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Kubernetes Migration Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="wordmark" href="#top" aria-label="Kubernetes Migration Lab">K8s Lab</a>
+      <nav class="nav-links" aria-label="Navigation principale">
+        <a href="#architecture">Architecture</a>
+        <a href="#runtime">Runtime</a>
+        <a href="#tasks">Tâches</a>
+      </nav>
+      <div class="topbar-actions">
+        <button class="cmd-button" id="commandButton" type="button" aria-haspopup="dialog">
+          <span>Ctrl K</span>
+        </button>
+        <a class="primary-link" href="#tasks">Tester API</a>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero surface-grid reveal" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="machine-label">Phase 2 · frontend service</p>
+          <h1 id="hero-title">A small app built for migration.</h1>
+          <p class="lead">
+            Le frontend parle au backend, le backend parle à PostgreSQL. Cette page devient notre surface de test avant Docker Compose, puis Kubernetes.
+          </p>
+          <div class="hero-actions" aria-label="Actions principales">
+            <button class="button button-primary" id="refreshButton" type="button">Rafraîchir</button>
+            <a class="button button-secondary" href="http://localhost:5001/health">Voir health</a>
+          </div>
+        </div>
+
+        <aside class="api-panel" aria-label="Aperçu API">
+          <div class="api-panel-head">
+            <span>GET /api/info</span>
+            <strong id="healthPill">checking</strong>
+          </div>
+          <pre id="statusBox">Chargement...</pre>
+        </aside>
+      </section>
+
+      <section class="section reveal" id="architecture" aria-labelledby="architecture-title">
+        <div class="section-copy">
+          <p class="machine-label">Architecture</p>
+          <h2 id="architecture-title">Three services, one migration path.</h2>
+        </div>
+        <div class="service-map" aria-label="Flux applicatif">
+          <article class="service-node">
+            <span>01</span>
+            <h3>Frontend</h3>
+            <p>HTML, CSS et JavaScript servis par Nginx en conteneur.</p>
+          </article>
+          <article class="service-node">
+            <span>02</span>
+            <h3>Backend</h3>
+            <p>API Express qui expose `/health`, `/api/info` et `/api/tasks`.</p>
+          </article>
+          <article class="service-node">
+            <span>03</span>
+            <h3>PostgreSQL</h3>
+            <p>Service stateful, futur candidat à un volume persistant Kubernetes.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="runtime-band reveal" id="runtime" aria-labelledby="runtime-title">
+        <div>
+          <p class="machine-label">Runtime contract</p>
+          <h2 id="runtime-title">Ports and names stay explicit.</h2>
+        </div>
+        <dl class="runtime-list">
+          <div>
+            <dt>Frontend</dt>
+            <dd>localhost:3001 -> container:80</dd>
+          </div>
+          <div>
+            <dt>Backend</dt>
+            <dd>localhost:5001 -> container:5000</dd>
+          </div>
+          <div>
+            <dt>Database</dt>
+            <dd>localhost:5433 -> container:5432</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="section section-tasks reveal" id="tasks" aria-labelledby="tasks-title">
+        <div class="section-copy">
+          <p class="machine-label">PostgreSQL check</p>
+          <h2 id="tasks-title">Tasks loaded through the backend.</h2>
+        </div>
+        <form id="taskForm" class="task-form" aria-describedby="taskHelp">
+          <div class="field">
+            <label for="taskInput">Nouvelle tâche</label>
+            <input id="taskInput" type="text" placeholder="Écrire un manifest Kubernetes" autocomplete="off" />
+            <p id="taskHelp" class="helper-text">La tâche est envoyée à l’API, puis stockée dans PostgreSQL.</p>
+          </div>
+          <button class="button button-primary" type="submit">Ajouter</button>
+        </form>
+        <ul id="taskList" class="task-list" aria-live="polite"></ul>
+      </section>
+    </main>
+
+    <dialog class="command-dialog" id="commandDialog" aria-labelledby="commandTitle">
+      <form method="dialog" class="command-shell">
+        <div class="command-head">
+          <h2 id="commandTitle">Commandes rapides</h2>
+          <button class="icon-button" value="close" aria-label="Fermer" type="submit">×</button>
+        </div>
+        <input id="commandSearch" class="command-search" type="search" placeholder="Filtrer les commandes" />
+        <div class="command-list" id="commandList" role="listbox" aria-label="Commandes rapides"></div>
+      </form>
+    </dialog>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+node_modules/
+.env
+*.log
+dist/
+build/
+.DS_Store
+.agents/
+.hallmark/
+app/.agents/
+app/skills-lock.json
+/tokens.css
+infra/k8s/database-secret.yaml
