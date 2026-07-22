@@ -10,3 +10,6 @@ app/.agents/
 app/skills-lock.json
 /tokens.css
 infra/k8s/database-secret.yaml
+concepts/
+phases/
+rapport/

@@ -32,10 +32,6 @@ app/
 infra/
   k8s/            manifests Kubernetes
 
-concepts/         notes theoriques
-phases/           guide de progression par phase
-rapport/          rapports pratiques par phase
-
 docker-compose.yml
 GUIDE-LANCEMENT.md
 README.md
@@ -130,23 +126,6 @@ minikube service frontend-service -n k8s-lab
 - `livenessProbe` : verifie si le conteneur est vivant
 - `readinessProbe` : verifie si le Pod est pret
 - `resources` : definit CPU/memoire demandes et limites
-
-## Phases realisees
-
-```text
-Phase 0 - Prerequis
-Phase 1 - Preparation de l'application
-Phase 2 - Dockerisation
-Phase 3 - Environnement Kubernetes local
-Phase 4 - Deploiement Kubernetes
-Phase 5 - Fiabilisation des Deployments
-```
-
-Les rapports detailles sont dans :
-
-```text
-rapport/
-```
 
 ## Commandes utiles
 
