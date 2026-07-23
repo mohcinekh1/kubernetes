@@ -97,7 +97,7 @@ validate-kubernetes-manifests:
     - curl -sSL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz -o kubeconform.tar.gz
     - tar -xzf kubeconform.tar.gz kubeconform
     - chmod +x kubeconform
-    - kubeconform -summary -ignore-missing-schemas infra/k8s/*.yaml
+    - ./kubeconform -summary -ignore-missing-schemas infra/k8s/*.yaml
   rules:
     - changes:
         - infra/k8s/**/*
