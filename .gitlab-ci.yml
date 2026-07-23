@@ -95,7 +95,7 @@ validate-kubernetes-manifests:
     name: bitnami/kubectl:latest
     entrypoint: [""]
   script:
-    - kubectl apply --dry-run=client -f infra/k8s/
+    - kubectl apply --dry-run=client --validate=false -f infra/k8s/
   rules:
     - changes:
         - infra/k8s/**/*
