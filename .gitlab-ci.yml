@@ -92,10 +92,10 @@ scan-frontend-image:
 validate-kubernetes-manifests:
   stage: validate
   image:
-    name: bitnami/kubectl:latest
+    name: ghcr.io/yannh/kubeconform:latest
     entrypoint: [""]
   script:
-    - kubectl apply --dry-run=client --validate=false -f infra/k8s/
+    - kubeconform -summary -ignore-missing-schemas infra/k8s/*.yaml
   rules:
     - changes:
         - infra/k8s/**/*
