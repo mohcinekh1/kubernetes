@@ -3,6 +3,7 @@ stages:
   - build
   - security
   - validate
+  - deploy
 
 variables:
   DOCKER_TLS_CERTDIR: "/certs"
@@ -102,3 +103,22 @@ validate-kubernetes-manifests:
     - changes:
         - infra/k8s/**/*
         - .gitlab-ci.yml
+
+deploy-local-minikube:
+  stage: deploy
+  tags:
+    - local-minikube
+  script:
+    - kubectl config current-context
+    - kubectl get nodes
+    - kubectl apply -f infra/k8s/
+    - kubectl rollout status deployment/database -n k8s-lab --timeout=180s
+    - kubectl rollout status deployment/backend -n k8s-lab --timeout=180s
+    - kubectl rollout status deployment/frontend -n k8s-lab --timeout=180s
+    - kubectl get pods -n k8s-lab
+  environment:
+    name: local-minikube
+    url: http://k8s-lab.local
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
