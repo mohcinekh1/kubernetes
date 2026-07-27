@@ -108,7 +108,12 @@ deploy-local-minikube:
   stage: deploy
   tags:
     - local-minikube
+  variables:
+    KUBECONFIG: "C:\\Users\\user\\.kube\\config"
   script:
+    - $env:KUBECONFIG = "C:\Users\user\.kube\config"
+    - kubectl config get-contexts
+    - kubectl config use-context minikube
     - kubectl config current-context
     - kubectl get nodes
     - kubectl apply -f infra/k8s/
