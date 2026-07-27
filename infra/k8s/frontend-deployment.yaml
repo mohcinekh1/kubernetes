@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: k8s-migration-project-frontend:latest
+          image: k8s-migration-project-frontend:nginx-proxy-v1
           imagePullPolicy: Never
           ports:
             - containerPort: 80
