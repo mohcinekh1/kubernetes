@@ -1462,3 +1462,692 @@ Phrase a retenir :
 ```text
 test verifie le code, build verifie la construction, security verifie les risques, validate verifie les configurations.
 ```
+
+## Annexe - Base generale pour coder un pipeline dans n'importe quel projet
+
+Cette partie donne une methode generale pour commencer un fichier de pipeline CI dans presque n'importe quel projet.
+
+L'objectif est d'avoir une base reutilisable.
+
+### 1. Questions a poser avant d'ecrire le pipeline
+
+Avant de coder le fichier CI, il faut comprendre le projet.
+
+Questions importantes :
+
+```text
+Quelle technologie utilise le projet ?
+Comment installer les dependances ?
+Comment lancer les tests ?
+Comment construire l'application ?
+Est-ce qu'il y a une image Docker a construire ?
+Est-ce qu'il y a des fichiers Kubernetes, Terraform ou Docker Compose ?
+Est-ce qu'il faut scanner la securite ?
+Est-ce qu'il faut generer des artifacts ?
+```
+
+Exemples :
+
+| Type de projet | Dependances | Tests | Build |
+| --- | --- | --- | --- |
+| Node.js | `npm ci` | `npm test` | `npm run build` |
+| Python | `pip install -r requirements.txt` | `pytest` | package ou Docker |
+| Java Maven | `mvn clean install` | `mvn test` | `mvn package` |
+| Java Gradle | `./gradlew build` | `./gradlew test` | `./gradlew assemble` |
+| Frontend React/Vue | `npm ci` | `npm test` | `npm run build` |
+| Docker app | selon app | selon app | `docker build` |
+| Kubernetes app | selon app | selon app | `kubeconform` |
+
+### 2. Structure generale d'un pipeline
+
+Pipeline de base :
+
+```text
+test
+-> build
+-> security
+-> validate
+```
+
+Pipeline plus complet :
+
+```text
+prepare
+-> test
+-> build
+-> security
+-> package
+-> validate
+-> deploy
+```
+
+Pour le pilier CI, on se concentre surtout sur :
+
+```text
+test
+build
+security
+validate
+```
+
+### 3. Squelette general GitLab CI
+
+Fichier :
+
+```text
+.gitlab-ci.yml
+```
+
+Base generale :
+
+```yaml
+stages:
+  - test
+  - build
+  - security
+  - validate
+
+variables:
+  APP_NAME: "my-app"
+  IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
+
+test-app:
+  stage: test
+  image: alpine:3.20
+  script:
+    - echo "Install dependencies"
+    - echo "Run tests"
+
+build-app:
+  stage: build
+  image: alpine:3.20
+  script:
+    - echo "Build application"
+
+security-scan:
+  stage: security
+  image: alpine:3.20
+  script:
+    - echo "Run security checks"
+
+validate-config:
+  stage: validate
+  image: alpine:3.20
+  script:
+    - echo "Validate configuration files"
+```
+
+Role :
+
+```text
+Ce squelette donne la forme du pipeline.
+Ensuite on remplace les echo par les vraies commandes du projet.
+```
+
+### 4. Squelette general GitHub Actions
+
+Fichier :
+
+```text
+.github/workflows/ci.yml
+```
+
+Base generale :
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Install dependencies"
+      - run: echo "Run tests"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Build application"
+
+  security:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Run security checks"
+
+  validate:
+    runs-on: ubuntu-latest
+    needs: security
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Validate configuration files"
+```
+
+Role :
+
+```text
+Ce squelette GitHub Actions lance les jobs dans l'ordre :
+test -> build -> security -> validate.
+```
+
+### 5. Methode universelle pour coder un pipeline
+
+Etapes :
+
+```text
+1. Choisir l'outil CI
+2. Creer le fichier de configuration
+3. Definir les stages
+4. Choisir l'image d'execution
+5. Installer les dependances
+6. Lancer les tests
+7. Construire l'application
+8. Ajouter les scans securite
+9. Valider les fichiers de configuration
+10. Lire les logs et corriger
+```
+
+Exemple :
+
+```text
+GitLab  -> .gitlab-ci.yml
+GitHub  -> .github/workflows/ci.yml
+Jenkins -> Jenkinsfile
+CircleCI -> .circleci/config.yml
+```
+
+### 6. Commandes generales par technologie
+
+#### Node.js / Express / React / Vue
+
+```yaml
+script:
+  - npm ci
+  - npm test
+  - npm run build
+```
+
+Si le projet n'a pas de build :
+
+```yaml
+script:
+  - npm ci
+  - npm test
+```
+
+#### Python
+
+```yaml
+script:
+  - python --version
+  - pip install -r requirements.txt
+  - pytest
+```
+
+Avec lint :
+
+```yaml
+script:
+  - pip install -r requirements.txt
+  - pip install pytest flake8
+  - flake8 .
+  - pytest
+```
+
+#### Java Maven
+
+```yaml
+script:
+  - mvn clean test
+  - mvn package
+```
+
+#### Java Gradle
+
+```yaml
+script:
+  - ./gradlew test
+  - ./gradlew build
+```
+
+#### Docker
+
+```yaml
+script:
+  - docker build -t my-app:$CI_COMMIT_SHORT_SHA .
+```
+
+Avec push registry :
+
+```yaml
+script:
+  - echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
+  - docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA" .
+  - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+```
+
+#### Docker Compose
+
+```yaml
+script:
+  - docker compose config
+```
+
+Role :
+
+```text
+Verifier que docker-compose.yml est syntaxiquement valide.
+```
+
+#### Kubernetes
+
+```yaml
+script:
+  - kubeconform -summary -ignore-missing-schemas infra/k8s/*.yaml
+```
+
+Ou avec installation dans Alpine :
+
+```yaml
+script:
+  - apk add --no-cache curl tar
+  - curl -sSL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz -o kubeconform.tar.gz
+  - tar -xzf kubeconform.tar.gz kubeconform
+  - chmod +x kubeconform
+  - ./kubeconform -summary -ignore-missing-schemas infra/k8s/*.yaml
+```
+
+#### Terraform
+
+```yaml
+script:
+  - terraform fmt -check
+  - terraform init
+  - terraform validate
+```
+
+#### YAML general
+
+```yaml
+script:
+  - yamllint .
+```
+
+### 7. Exemple de pipeline GitLab adaptable a presque tout projet
+
+```yaml
+stages:
+  - test
+  - build
+  - security
+  - validate
+
+variables:
+  IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
+
+test:
+  stage: test
+  image: node:22-alpine
+  script:
+    - npm ci
+    - npm test
+
+build:
+  stage: build
+  image: docker:27
+  services:
+    - docker:27-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  script:
+    - docker build -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG" .
+
+security:
+  stage: security
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  script:
+    - trivy fs --severity HIGH,CRITICAL --exit-code 1 .
+
+validate:
+  stage: validate
+  image: alpine:3.20
+  script:
+    - echo "Validate project configuration"
+    - test -f README.md
+```
+
+Comment l'adapter :
+
+```text
+Projet Node.js  -> garder node:22-alpine dans test
+Projet Python   -> remplacer par python:3.12-alpine
+Projet Java     -> remplacer par maven ou gradle
+Projet Docker   -> garder docker:27 dans build
+Projet K8s      -> ajouter kubeconform dans validate
+```
+
+### 8. Exemple de pipeline GitHub Actions adaptable
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t my-app:${{ github.sha }} .
+
+  security:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+
+  validate:
+    runs-on: ubuntu-latest
+    needs: security
+    steps:
+      - uses: actions/checkout@v4
+      - run: test -f README.md
+```
+
+### 9. Checklist de depart pour n'importe quel pipeline
+
+Quand tu commences un nouveau projet, tu peux suivre cette checklist :
+
+```text
+[ ] Le fichier CI est cree
+[ ] Les stages sont definis
+[ ] Le job test installe les dependances
+[ ] Le job test lance les tests
+[ ] Le job build construit l'application ou l'image Docker
+[ ] Le job security scanne les vulnerabilites ou secrets
+[ ] Le job validate verifie les fichiers de configuration
+[ ] Les variables sensibles sont dans CI/CD Variables
+[ ] La branche main est protegee
+[ ] La PR/MR ne peut pas merger si la CI echoue
+```
+
+### 10. Regle simple pour choisir les commandes
+
+Pour coder un pipeline, il faut reprendre les commandes que tu lances deja localement.
+
+Exemple :
+
+```text
+Commande locale pour tester    -> va dans stage test
+Commande locale pour builder   -> va dans stage build
+Commande locale pour scanner   -> va dans stage security
+Commande locale pour valider   -> va dans stage validate
+```
+
+Phrase a retenir :
+
+```text
+Un pipeline CI automatise les commandes que l'equipe devrait lancer manuellement avant de merger.
+```
+
+## Annexe - Logs et traces a suivre dans la CI
+
+Dans le pilier Continuous Integration, les logs les plus importants sont les logs du pipeline.
+
+Question principale :
+
+```text
+Pourquoi le pipeline passe ou pourquoi il echoue ?
+```
+
+### 11. Ou trouver les logs CI
+
+Dans GitLab :
+
+```text
+Build -> Pipelines
+ouvrir le pipeline
+ouvrir le job failed ou passed
+lire la section job log
+```
+
+Dans GitHub :
+
+```text
+Actions
+ouvrir le workflow
+ouvrir le job
+lire les steps
+```
+
+Dans Jenkins :
+
+```text
+Build History
+Console Output
+```
+
+### 12. Comment lire un log de pipeline
+
+Methode :
+
+```text
+1. Identifier le job qui echoue
+2. Lire la derniere commande executee
+3. Lire le message d'erreur exact
+4. Identifier si c'est un probleme de code, dependance, image, configuration ou reseau
+5. Corriger
+6. Commit + push
+7. Relancer le pipeline
+```
+
+### 13. Logs du stage test
+
+Commandes typiques :
+
+```text
+npm ci
+npm test
+pytest
+mvn test
+```
+
+Ce qu'il faut chercher :
+
+```text
+test failed
+syntax error
+module not found
+dependency error
+assertion failed
+```
+
+Exemple :
+
+```text
+npm ERR! missing script: test
+```
+
+Signification :
+
+```text
+package.json ne contient pas de script test
+```
+
+Correction :
+
+```json
+"scripts": {
+  "test": "node --check server.js"
+}
+```
+
+### 14. Logs du stage build
+
+Commandes typiques :
+
+```text
+docker build
+npm run build
+mvn package
+```
+
+Ce qu'il faut chercher :
+
+```text
+Dockerfile error
+COPY failed
+image not found
+build failed
+permission denied
+```
+
+Exemple :
+
+```text
+unable to prepare context: path not found
+```
+
+Signification :
+
+```text
+le chemin du build Docker est incorrect
+```
+
+Correction :
+
+```text
+verifier le context dans docker build ou docker-compose.yml
+```
+
+### 15. Logs du stage security
+
+Commandes typiques :
+
+```text
+trivy image
+trivy fs
+gitleaks detect
+npm audit
+```
+
+Ce qu'il faut chercher :
+
+```text
+CRITICAL
+HIGH
+secret detected
+vulnerability found
+exit code 1
+```
+
+Important :
+
+```text
+Une faille HIGH ou CRITICAL doit etre analysee avant merge.
+```
+
+### 16. Logs du stage validate
+
+Commandes typiques :
+
+```text
+kubeconform
+docker compose config
+yamllint
+terraform validate
+```
+
+Ce qu'il faut chercher :
+
+```text
+invalid YAML
+missing schema
+unknown field
+indentation error
+connection refused
+```
+
+Exemple :
+
+```text
+failed to download openapi
+localhost:8080 connection refused
+```
+
+Signification :
+
+```text
+kubectl essaie de contacter un cluster qui n'existe pas dans le runner
+```
+
+Correction :
+
+```text
+utiliser kubeconform pour valider sans cluster
+```
+
+### 17. Logs utiles dans notre projet
+
+GitLab CI :
+
+```text
+test-backend
+test-frontend
+build-backend-image
+build-frontend-image
+scan-backend-image
+scan-frontend-image
+validate-kubernetes-manifests
+deploy-local-minikube
+```
+
+Pour chaque job, lire :
+
+```text
+image utilisee
+commande executee
+message d'erreur
+exit code
+durée du job
+artifacts si presents
+```
+
+### 18. Phrase a retenir
+
+```text
+Dans la CI, les logs expliquent exactement quelle verification a echoue et quelle commande doit etre corrigee.
+```

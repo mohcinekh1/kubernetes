@@ -90,6 +90,49 @@ scan-frontend-image:
         - app/frontend/**/*
         - .gitlab-ci.yml
 
+scan-filesystem:
+  stage: security
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  script:
+    - trivy fs --exit-code 0 --severity HIGH,CRITICAL .
+  allow_failure: true
+  rules:
+    - changes:
+        - app/**/*
+        - infra/**/*
+        - docker-compose.yml
+        - .gitlab-ci.yml
+
+scan-kubernetes-config:
+  stage: security
+  image:
+    name: aquasec/trivy:latest
+    entrypoint: [""]
+  script:
+    - trivy config --exit-code 0 --severity HIGH,CRITICAL infra/k8s/
+  allow_failure: true
+  rules:
+    - changes:
+        - infra/k8s/**/*
+        - .gitlab-ci.yml
+
+scan-secrets:
+  stage: security
+  image:
+    name: zricethezav/gitleaks:latest
+    entrypoint: [""]
+  script:
+    - gitleaks detect --source . --verbose --redact --exit-code 0
+  allow_failure: true
+  rules:
+    - changes:
+        - app/**/*
+        - infra/**/*
+        - docker-compose.yml
+        - .gitlab-ci.yml
+
 validate-kubernetes-manifests:
   stage: validate
   image: alpine:3.20

@@ -968,3 +968,98 @@ Phrase finale :
 ```text
 DevOps est d'abord une culture de collaboration, puis une pratique d'automatisation et de mesure.
 ```
+
+## Annexe - Logs et traces a suivre dans ce pilier
+
+Dans le pilier Culture et Collaboration, les logs ne sont pas seulement des logs techniques.
+
+Ici, on suit surtout les **traces de collaboration**.
+
+### 18. Ou trouver les traces
+
+Sources importantes :
+
+```text
+Jira tickets
+GitHub Issues
+GitHub Pull Requests
+GitLab Merge Requests
+commentaires de review
+historique des decisions
+postmortems
+runbooks
+messages d'incident
+```
+
+### 19. Ce qu'il faut verifier
+
+Dans un ticket Jira ou une Issue :
+
+```text
+le besoin est clair
+le responsable est defini
+le statut est a jour
+les blocages sont visibles
+les criteres d'acceptation existent
+les liens vers PR/MR sont presents
+```
+
+Dans une Pull Request ou Merge Request :
+
+```text
+la description explique le changement
+les tests sont mentionnes
+les commentaires sont traites
+la review est approuvee
+la CI est visible
+```
+
+Dans un incident/postmortem :
+
+```text
+ce qui s'est passe
+impact utilisateur
+cause principale
+actions correctives
+responsable des actions
+date de suivi
+```
+
+### 20. Comment comprendre ces traces
+
+Une bonne trace de collaboration doit repondre a ces questions :
+
+```text
+Qui a fait quoi ?
+Pourquoi ce changement existe ?
+Quel probleme est resolu ?
+Comment cela a ete teste ?
+Quel est le statut actuel ?
+Quelle est la prochaine action ?
+```
+
+Si ces questions n'ont pas de reponse, la collaboration n'est pas assez claire.
+
+### 21. Exemple pratique
+
+Mauvais commentaire :
+
+```text
+ca marche pas
+```
+
+Bon commentaire :
+
+```text
+Le test /api/tasks echoue via Ingress avec une erreur 404.
+Depuis backend-service le test fonctionne.
+Je pense que le probleme vient de la configuration Nginx du frontend.
+Commande utilisee :
+curl http://k8s-lab.local/api/tasks
+```
+
+### 22. Phrase a retenir
+
+```text
+Dans Culture et Collaboration, les logs servent a comprendre le travail de l'equipe, pas seulement l'etat des machines.
+```

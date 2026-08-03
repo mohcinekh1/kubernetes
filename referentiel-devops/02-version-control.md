@@ -984,6 +984,193 @@ Tag = marqueur de version
 Le Version Control est essentiel en DevOps parce qu'il permet de tracer chaque changement du code, collaborer avec branches et Pull Requests, declencher les pipelines CI/CD et revenir en arriere proprement en cas de probleme.
 ```
 
+## Annexe - Logs et traces a suivre dans Version Control
+
+Dans le pilier Version Control, les logs servent a comprendre l'historique du code.
+
+Question principale :
+
+```text
+Quel changement a ete fait, par qui, quand, et pourquoi ?
+```
+
+### 8. Logs Git locaux
+
+Voir l'historique simple :
+
+```powershell
+git log --oneline
+```
+
+Role :
+
+```text
+affiche les commits de maniere courte
+```
+
+Voir l'historique avec branches :
+
+```powershell
+git log --oneline --graph --decorate --all
+```
+
+Role :
+
+```text
+comprendre les branches, merges et commits
+```
+
+Voir le detail d'un commit :
+
+```powershell
+git show COMMIT_ID
+```
+
+Exemple :
+
+```powershell
+git show 9b8716f
+```
+
+Role :
+
+```text
+voir les fichiers modifies et le contenu du changement
+```
+
+### 9. Logs d'etat Git
+
+Voir les fichiers modifies :
+
+```powershell
+git status
+```
+
+Voir les differences non commitees :
+
+```powershell
+git diff
+```
+
+Voir les fichiers prepares pour commit :
+
+```powershell
+git diff --staged
+```
+
+Role :
+
+```text
+eviter de commiter ou pousser des fichiers non voulus
+```
+
+### 10. Logs de branches et remotes
+
+Voir les branches :
+
+```powershell
+git branch -a
+```
+
+Voir les remotes :
+
+```powershell
+git remote -v
+```
+
+Verifier la difference entre une branche et main :
+
+```powershell
+git diff --name-status origin/main...ma-branche
+```
+
+Role :
+
+```text
+comprendre ce qu'une Pull Request va contenir avant de la creer
+```
+
+### 11. Logs GitHub ou GitLab
+
+Dans GitHub/GitLab, verifier :
+
+```text
+Commits
+Files changed
+Conversation
+Checks ou Pipelines
+Merge history
+Revert history
+```
+
+Avant de merger une PR/MR :
+
+```text
+verifier le nombre de commits
+verifier les fichiers changes
+verifier que la CI passe
+verifier que les commentaires sont resolus
+```
+
+### 12. Comprendre les erreurs courantes
+
+Erreur :
+
+```text
+rejected main -> main (fetch first)
+```
+
+Signification :
+
+```text
+le repository distant contient des commits que tu n'as pas en local
+```
+
+Correction :
+
+```powershell
+git pull --rebase origin main
+git push origin main
+```
+
+Erreur :
+
+```text
+unknown switch `m'
+```
+
+Cause :
+
+```text
+commande incorrecte : git push origin -main
+```
+
+Correction :
+
+```powershell
+git push origin main
+```
+
+Warning :
+
+```text
+LF will be replaced by CRLF
+```
+
+Signification :
+
+```text
+Git convertit les fins de ligne Linux vers Windows
+```
+
+Ce n'est pas bloquant.
+
+### 13. Phrase a retenir
+
+```text
+Dans Version Control, les logs Git sont la memoire du projet.
+```
+
 ## Sources officielles
 
 - Git documentation: https://git-scm.com/doc
