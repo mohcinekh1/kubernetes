@@ -12,5 +12,5 @@ app/skills-lock.json
 infra/k8s/database-secret.yaml
 concepts/
 phases/
-referentie-devops/
+referentiel-devops/
 rapport/
